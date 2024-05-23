@@ -43,8 +43,14 @@ short_words = words[ind:]
 types_of_long_words = get_type_vect(long_words)
 #print(types_of_long_words)
 
+#open file
 
+df = pd.read_csv("New_types.txt", sep=",", header=None)
+df.columns = ["lemma", "type", "ipm"]
 
-
+long_df = pd.DataFrame({"word": long_words, 'type': [types_of_long_words]})
+for elem in types_of_long_words:
+    temp = df.loc[df["type"] == elem]
+    print(temp.shape[0])
 
 
