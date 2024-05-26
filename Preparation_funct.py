@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import re
 
 def get_type(s):
     temp = list(s)
@@ -19,3 +21,26 @@ def get_type(s):
     return res
 
 get_type_vect = np.vectorize(get_type)
+
+
+#find regular expression for the word
+def get_regular(word, pos_let):
+    list_of_letters = [re.escape(i) for i in pos_let]
+    reg = ''
+    w = "[" +"".join(list_of_letters) + "]"
+    for e in word:
+        if e.islower():
+            reg += w #choose a letter from possible variants
+        else:
+            reg += e.lower()
+    reg += '$'
+    return reg
+
+def get_dataframe(subst, df, possible_letters, col_name):
+    word = subst
+    word_mask = get_regular(word, possible_letters)
+    res = df[df[col_name].str.contains(word_mask, regex=True, na=False)]
+    return res
+
+
+
