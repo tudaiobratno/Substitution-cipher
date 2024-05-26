@@ -27,7 +27,10 @@ get_type_vect = np.vectorize(get_type)
 def get_regular(word, pos_let):
     list_of_letters = [re.escape(i) for i in pos_let]
     reg = ''
-    w = "[" +"".join(list_of_letters) + "]"
+    if len(list_of_letters) != 0:
+        w = "[" +"".join(list_of_letters) + "]"
+    else:
+        w = ''
     for e in word:
         if e.islower():
             reg += w #choose a letter from possible variants

@@ -9,6 +9,10 @@ plaint_text = "Иуда раздражался и визгливо кричал,
 cipher_text = "МЧЖВ УВЙЖУВИВРХБ М ДМЙЕРМДФ ПУМЫВР, ЫЦФ ФТ ДХЗ ЯЦФ ХВС ДМЖЗР М ХВС ХРЭЬВР, ТФ ЧОУБСЭН ШФСВ ОУФЖФРИВР ЖФОУВЬМДВЦЮ ТЗФЦДБЙЫМДФ М ХОФПФНТФ, ОФПВ МЧЖВ ТЗ ХФЙТВДВРХБ, ЫЦФ ХФРЕВР, МРМ ТЗ ХФЫМТБР ТФДФН ОУВДЖФОФЖФГТФН РИМ, ТВЖ ПФЦФУФА ЦФЦ ТВЖФРЕФ ЙВЖЧСЭДВРХБ. М, ТВНЖБ ФЬМГПЧ, ТЗСЗЖРЗТТФ ОУМЩФЖМР М УВДТФЖЧЬТФ ЧРМЫВР РИЗЪВ."
 ct = cipher_text.lower()
 
+TABLE = dict()
+for i in range(32):
+    TABLE[chr(ord('А') + i)] = ''
+print(TABLE)
 #find_words
 tw = tokenize.TweetTokenizer()
 words = tw.tokenize(ct)
@@ -62,86 +66,88 @@ print(t)
 
 #-----------------
 
-def list_f(S, L, df):
+def list_f(W_and_T, USED, df):
     global score_global, res_global
-    subst_list = []
-    Len = len(S)
     score = 0
-    words = []
-    types = []
-    #ищу датафрейм для каждого слова
-    for word, type in S:
-        words.append(word)
-        types.append(type)
-        temp = get_dataframe(word, df[df["type"] == type], L, 'lemma')
-        subst_list.append([temp.shape[0], word, type])
+    res = []
+    subst_list = []
+    for word, type in W_and_T:
+        temp = get_dataframe(word, df[df["type"] == type], USED, 'lemma')
+        subst_list.append((temp.shape[0], word, type))
 
     subst_list = sorted(subst_list)
-    ind = 0
     print(subst_list)
-    #пропускаю 0 и 1 - уже известные или совсем неизвестные слова
-    while (ind < Len) and (subst_list[ind][0] == 0):
-        ind += 1
-    while (ind < Len) and (subst_list[ind][0] == 1):
-        if subst_list[ind][0] != subst_list[ind][0].upper():
-            q = get_dataframe(w, df[df["type"] == t], L, 'lemma')['lemma'][0]
-            w_l, r_l = list(w), list(new_subst)
-            for j in range(len(w_l)):
-                words_str = words_str.replace(w[j], r_l[j].upper())  # замена букв
-        ind += 1
-        score += 1
-
-    #проверка, где остановился индекс
-    while (ind < Len):
-        #где остановились
-        w, t = subst_list[ind][1], subst_list[ind][2]
-
-        #делаем подбор для каждого возможного слова
-        for new_subst in get_dataframe(w, df[df["type"] == t], L, 'lemma')['lemma']:
-            #копируем данные
-            copy_of_words = words.copy()
-            copy_of_types = types.copy()
-            #строка из слов для замены
-            words_str = ' '.join(copy_of_words)
-            #множество букв в новом слове. Если там есть та, которую мы уже использовали, отменяем подстановку
-            sub_letters = set(list(new_subst))
-            if len(sub_letters - set(L)) == 0:
-                w_l, r_l = list(w), list(new_subst)
-                for j in range(len(w_l)):
-                    words_str = words_str.replace(w[j], r_l[j].upper()) #замена букв
-                copy_of_words = words_str.split()
-                new_S = []
-                for i in range(len(copy_of_words)):
-                    new_S.append((copy_of_words[i], copy_of_types[i])) #составили новый список с учетом замены
-                print("before", new_S, list(set(L) - sub_letters))
-                list_f(new_S, list(set(L) - sub_letters), df) #идем в рекурсию
+    ind = 0
+    #print(subst_list)
+    # пропускаю 0 и 1 - уже известные или совсем неизвестные слова
+    while (ind < len(subst_list)) and (subst_list[ind][0] == 0):
         ind += 1
 
+    flag = subst_list[ind][0] == 1
+    while (ind < len(subst_list)) and (flag):
+        current_word = subst_list[ind][1]
+        if current_word.isupper():
+            score += 1
+            ind += 1
+        else:
+            flag = False
 
 
-    else:
-       # print("CHECK:" , subst_list)
+    if (ind == len(subst_list)):
         if score > score_global:
             score_global = score
             res = []
             for i in subst_list:
                 res.append(i[1])
             res_global = [res]
-        if score == score_global:
+        elif score == score_global:
             res = []
             for i in subst_list:
                 res.append(i[1])
-            res_global.append(res)
+            if res not in res_global:
+                res_global.append(res)
+
+    else:
+        #print(subst_list)
+        while (ind < len(subst_list)):
+            current_word = subst_list[ind][1]
+           # print(get_dataframe(current_word, df[df["type"] == subst_list[ind][2]], USED, 'lemma')['lemma'])
+            sss = subst_list.copy()
+            for subst_word in get_dataframe(current_word, df[df["type"] == sss[ind][2]], USED, 'lemma')['lemma'].tolist():
+                #print(subst_word)
+                subst_list = sss
+                temp = []
+                for j in range(len(subst_list)):
+                    temp.append(subst_list[j][1])
+                new_words = ' '.join(temp)
+
+                w_l, r_l = list(current_word), list(subst_word)
+                for j in range(len(w_l)):
+                    new_words = new_words.replace(w_l[j], r_l[j].upper())
+                new_words = new_words.split()
+                temp = []
+
+                for i in range(len(subst_list)):
+                    temp2 = get_dataframe(new_words[i], df[df["type"] == subst_list[i][2]], set(USED) - set(r_l), 'lemma')
+                    temp.append((temp2.shape[0], new_words[i], subst_list[i][2]))
+                subst_list = temp
+                temp = []
+                for i in range(len(subst_list)):
+                    temp.append((subst_list[i][1], subst_list[i][2]))
+                list_f(temp, set(USED) - set(r_l), df)
+            USED = list(set(USED) - set(r_l))
+            ind += 1
 
 
 #-------------------------
 
-k = "АДСОБЩЛСРРЮМ".lower().split()
+k = "Б МХЪВФЮ МВЪВ КЕТВ ЯДРНАШКРППЭЛ ЯМТВП УРНПШЖ".lower().split()
 s = []
 for elem in k:
     s.append((elem, get_type(elem)))
 #s = [("ШкОлА", '0.1.2.3.4', 1), ("ШкОЛА", '0.1.2.3.4', 2), ("ШКОЛА", '0.1.2.3.4', 3)]
-L =  [chr(ord('а') + i) for i in range(32)]
-list_f(s, L, df)
-print(res_global)
+Lo =  [chr(ord('а') + i) for i in range(32)]
+list_f(s, Lo, df)
+for elem in res_global:
+    print(elem)
 
