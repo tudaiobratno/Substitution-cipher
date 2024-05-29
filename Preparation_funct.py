@@ -45,5 +45,8 @@ def get_dataframe(subst, df, possible_letters, col_name):
     res = df[df[col_name].str.contains(word_mask, regex=True, na=False)]
     return res
 
-
+def find_all_mask(diction, mask):
+    r = re.compile(mask)
+    newlist = list(filter(r.match, diction))
+    return newlist
 
