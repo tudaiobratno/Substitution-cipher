@@ -6,7 +6,7 @@ from nltk import tokenize
 
 #MAIN FUNCTION. It's in the main.py file due to usage of global variables
 def round(W_and_T, USED, df):
-    global score_global, res_global
+    global score_global, res_global, TABLE
     STOP = 150 #boundary of checking possible substitutions
     score = 0
     subst_list = [] #list of: (number of possible substitutions, partially decrypted word, pattern of the word
@@ -30,7 +30,7 @@ def round(W_and_T, USED, df):
             score += 1
             ind += 1
         else:
-            FLAG= False
+            FLAG = False
 
 
 
@@ -53,7 +53,9 @@ def round(W_and_T, USED, df):
 
             w_l, r_l = list(current_word), list(subst_word)
             for j in range(len(w_l)):
-                new_words = new_words.replace(w_l[j], r_l[j].upper())
+                if (w_l[j]) != (w_l[j].upper()):
+                    new_words = new_words.replace(w_l[j], r_l[j].upper())
+                    TABLE[w_l[j]] = r_l[j].upper()
             new_words = new_words.split()
             temp = []
 
@@ -96,7 +98,8 @@ ct = cipher_text.lower()
 #table of letters
 TABLE = dict()
 for i in range(32):
-    TABLE[chr(ord('А') + i)] = ''
+    TABLE[chr(ord('а') + i)] = ''
+TABLE['ё'] = ''
 
 #find_words and delete punctuation
 tw = tokenize.TweetTokenizer()
@@ -150,7 +153,19 @@ NOT_USED_letters.append('ё')
 round(S, NOT_USED_letters, df)
 
 #print substitutions
-for elem in res_global:
-    print(elem)
+#for elem in res_global:
+    #print(elem)
 
 
+res = ct
+key = ''
+
+for let in TABLE:
+    if TABLE[let] != '':
+        res = res.replace(let, TABLE[let])
+        key += TABLE[let]
+    else:
+        key += '_'
+
+print(f"The key (for абвгдежзийклмнопрстуфхцчшщъыьэюяё) is: {key}")
+print(f"\nCiphertext: {ct}\n\nPlaintext: {res}")
