@@ -30,7 +30,7 @@ u = df["Lemma"].unique()
 #morph = pymorphy2.MorphAnalyzer()
 for elem in u:
 
-    #exra for pymorhy. Works incorrectly
+    #extra for pymorhy. Works incorrectly
     '''word = elem
     parsed_word = morph.parse(word)[0]
     word_forms = parsed_word.lexeme
