@@ -4,3 +4,6 @@
 2. Bulatović L., Mijanović A., Asanović B., Trajković N., Božović V. Automated Cryptanalysis of Substitution Cipher Using Hill Climbing With Well Designed Heuristic Function
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+На данный момент реализована первая часть проекта, которая позволяет восстановить зашифрованное сообщение и ключ при помощи словаря. Словарь был создан на основе https://github.com/danakt/russian-words и http://dict.ruslang.ru/freq.php
